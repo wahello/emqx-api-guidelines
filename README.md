@@ -20,13 +20,9 @@ Response Body 目前支持以下字段：
 
   错误原因的详细描述，code为0时此字段可以省略
   
-- items, [JSON Object()]
+- data, JSON Object() or [JSON Object()]
 
-  用于返回详细数据，在可能存在多条数据时使用
-  
-- item, JSON Object()
-
-  用于返回详细数据，在只可能返回单条数据时使用
+  用于返回详细数据，有多条数据时返回 JSON 列表
   
 - meta, JSON Object()
 
@@ -44,12 +40,12 @@ Response Body 目前支持以下字段：
 
 #### 获取节点监控数据
 
-返回结果只可能存在一条数据，因此使用 item 字段，并且省略 message 字段
+code 为 0，省略 message 字段
 
 ```
 {
 	"code" : 0,
-	"item": {
+	"data": {
 		"connections": 2,
 		"load1": "2.75",
 		"load15": "2.87",
@@ -70,12 +66,12 @@ Response Body 目前支持以下字段：
 
 #### 获取集群订阅信息
 
-返回结果中可能存在多条数据，且此请求支持分页，因此使用 items 和 meta 字段
+返回结果中可能存在多条数据，且此请求支持分页，因此使用 meta 字段
 
 ```
 {
 	"code" : 0,
-	"items" : [
+	"data" : [
 		{
 			"client_id": "emqx-api-test:v1",
 			"node": "emqx@127.0.0.1",
