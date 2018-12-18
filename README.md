@@ -1,14 +1,131 @@
 # emqx-api-guidelines
+
 EMQ X RESTful API Guidelines
 
+## EMQX Broker
 
-## Error
+### Response Format
+
+Response Status Code: 200 / 400 / 401
+
+Response Body: JSON Object
+
+Response Body 目前支持以下字段：
+
+- code, integer()
+
+  具体业务返回的错误码，非0值表示错误，此字段不可省略
+
+- message, string()
+
+  错误原因的详细描述，code为0时此字段可以省略
+  
+- items, [JSON Object()]
+
+  用于返回详细数据，在可能存在多条数据时使用
+  
+- item, JSON Object()
+
+  用于返回详细数据，在只可能返回单条数据时使用
+  
+- meta, JSON Object()
+
+  用于返回分页的信息，例如：
+  
+  ```
+  	"meta" : {
+  		"count" : 1,
+  		"limit" : 1000,
+  		"page" : 1
+  	}
+  ```
+
+### Examples
+
+#### 获取节点监控数据
+
+返回结果只可能存在一条数据，因此使用 item 字段，并且省略 message 字段
+
+```
+{
+	"code" : 0,
+	"item": {
+		"connections": 2,
+		"load1": "2.75",
+		"load15": "2.87",
+		"load5": "2.57",
+		"max_fds": 7168,
+		"memory_total": 80162816,
+		"memory_used": 62254160,
+		"name": "emqx@127.0.0.1",
+		"node_status": "Running",
+		"otp_release": "R21/10.0.5",
+		"process_available": 262144,
+		"process_used": 331,
+		"uptime": "1 days,18 hours, 45 minutes, 1 seconds",
+		"version": "3.0"
+	}
+}
+```
+
+#### 获取集群订阅信息
+
+返回结果中可能存在多条数据，且此请求支持分页，因此使用 items 和 meta 字段
+
+```
+{
+	"code" : 0,
+	"items" : [
+		{
+			"client_id": "emqx-api-test:v1",
+			"node": "emqx@127.0.0.1",
+			"qos": 0,
+			"topic": "/test"
+		},
+		{
+			"client_id": "mqttjs_406e3f9a",
+			"node": "emqx@127.0.0.1",
+			"qos": 0,
+			"topic": "/test"
+		}
+	],
+	"meta": {
+		"count": 2,
+		"limit": 10000,
+		"page": 1
+	}
+}
+```
+### Error Codes
+
+| Error Code | Description                     |
+| :--------- | :------------------------------ |
+| 0          | Success                         |
+| 101        | Bad RPC                         |
+| 102        | Unknown Error                   |
+| 103        | Username or password error      |
+| 104        | Empty username or password      |
+| 105        | User does not exist             |
+| 106        | Admin can not be deleted        |
+| 107        | Missing request parameter       |
+| 108        | Request parameter type error    |
+| 109        | Request parameter is not a json |
+| 110        | Plugin has been loaded          |
+| 111        | Plugin has been unloaded        |
+| 112        | Client not online               |
+| 113        | User already exist              |
+| 114        | Old password error              |
+| 115        | Bad topic                       |
+
+## ActorCloud
+
+### Error
 
 - 普通错误
 
 ```
 {
-  "message": "Permission Denied"
+	"message": "Permission Denied"
 }
 ```
 
@@ -18,16 +135,16 @@ EMQ X RESTful API Guidelines
 {
 	"message": "Validation Failed"
 	"errors": [
-     {
-	    "field": "title",
-	    "message": "missing field"
-     }
-   ]
+		{
+			"field": "title",
+			"message": "missing field"
+		}
+	]
 }
 ```
 
 
-## GET
+### GET
 
 #### 单个资源的详情直接返回对象
 
